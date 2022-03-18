@@ -1,6 +1,6 @@
 
 import styles from './App.module.css';
-import PageCanvas from '../components/PageCanvas';
+import PageCanvas from '../Babylon/PageCanvas';
 
 function App() {
 

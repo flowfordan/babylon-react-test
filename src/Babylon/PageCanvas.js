@@ -1,27 +1,29 @@
 import React from "react";
-import { FreeCamera, Vector3, HemisphericLight, MeshBuilder,
-    ArcRotateCamera, ShadowGenerator, DirectionalLight, StandardMaterial, Color3, Color4 } from "@babylonjs/core";
-import SceneComponent from "./SceneComponent"; // uses above component in same directory
+import { Vector3, HemisphericLight, MeshBuilder,
+    ArcRotateCamera, ShadowGenerator, DirectionalLight, 
+    StandardMaterial, Color3, Color4 } from "@babylonjs/core";
+import SceneComponent from "../components/SceneComponent"; // uses above component in same directory
 // import SceneComponent from 'babylonjs-hook'; // if you install 'babylonjs-hook' NPM.
 // import "./App.css";
-import styles from './PageCanvas.module.css'
+import styles from './PageCanvas.module.css';
+import myBox from '../Babylon/Test/testBox';
+
 
 let box;
 
 
 const onSceneReady = (scene) => {
-//CAMERA
-  // This creates and positions a free camera (non-mesh)
-  var camera = new ArcRotateCamera("camera1", 3, 1, 20, Vector3.Zero(), scene);
-  //new Vector3(0, 5, -10)
 
-  // This targets the camera to scene origin
-  camera.setTarget(Vector3.Zero());
+
+
+//CAMERA
+const mainCamera = new ArcRotateCamera("camera1", 3, 1, 20, Vector3.Zero(), scene); 
+mainCamera.setTarget(Vector3.Zero());// This targets the camera to scene origin
+
 
   const canvas = scene.getEngine().getRenderingCanvas();
-
   // This attaches the camera to the canvas
-  camera.attachControl(canvas, true);
+  mainCamera.attachControl(canvas, true);
 
   //MATERIAL
   var mainMaterial = new StandardMaterial("myMaterial", scene);
@@ -57,6 +59,10 @@ const onSceneReady = (scene) => {
   secondBox.enableEdgesRendering(); 
   secondBox.edgesWidth = 4.0;
     secondBox.edgesColor = new Color4(0, 0, 1, 1);
+
+
+  const newBox = new myBox(2, new Vector3(-3, 1, -2), scene, transparentMat)
+  
 
   // Our built-in 'ground' shape.
   const ground = MeshBuilder.CreateGround("ground", { width: 20, height: 20 }, scene);
