@@ -1,0 +1,27 @@
+.App {
+  margin: 0;
+  display: grid;
+  grid-template-areas: 
+  'head'
+  'body'
+  'foot';
+  height: 100vh;
+  background-color: lightslategray;
+
+  grid-template-rows: 80px auto 40px;
+}
+
+.appHeader{
+ grid-area: head;
+ background-color: lightsteelblue;
+}
+
+.appBody{
+  grid-area: body;
+}
+
+.appFooter{
+  grid-area: foot;
+  background-color: lightsteelblue;
+}
+
