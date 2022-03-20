@@ -11,7 +11,7 @@ function App() {
   return (
     <div className={styles.App}>
       <header className={styles.appHeader}>
-        Learn React
+        <h2>React + Babylon</h2>
       </header>
       <div className={styles.appBody}>
         <PageCanvas />

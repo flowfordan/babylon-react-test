@@ -1,7 +1,7 @@
-import { MeshBuilder, Vector3, Mesh, enableEdgesRendering } from "@babylonjs/core";
+import { MeshBuilder, Vector3, Mesh, enableEdgesRendering, AbstractMesh } from "@babylonjs/core";
 
 
-export default class myBox extends Mesh{
+export default class MyBox extends AbstractMesh{
     constructor(size, position, scene, material) {
         super()
         this._size = size
@@ -9,21 +9,26 @@ export default class myBox extends Mesh{
         this._material = material
         this._position = position
 		this.initGeometry(position);
-        this.enableEdgesRendering()
+        
     }
 
     initGeometry(position) {
 		this._mesh = MeshBuilder.CreateBox("myBox", { size: this._size }, this._scene);
         this._mesh.material = this._material;
 		this._mesh.position = position;
+        // this._mesh.enableEdgesRendering()
+        // this._mesh.edgesWidth = 4.0;
 
         return this._mesh
     }
 
-    enableEdgesRendering(){
-        this._mesh.enableEdgesRendering()
-        this._mesh.edgesWidth = 4.0;
+
+    showWireframe(width, color){
+        this._mesh.enableEdgesRendering();
+        this._mesh.edgesWidth = width;
+        this._mesh.edgesColor = color;
     }
+
 
 
 }
@@ -31,3 +36,4 @@ export default class myBox extends Mesh{
 
 
 //myBox.initGeometry
+    
