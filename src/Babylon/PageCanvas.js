@@ -1,7 +1,7 @@
 import React from "react";
 import { Vector3, HemisphericLight, MeshBuilder,
     ArcRotateCamera, ShadowGenerator, DirectionalLight, 
-    StandardMaterial, Color3, Color4, Matrix, RayHelper, AxesViewer} from "@babylonjs/core";
+    StandardMaterial, Color3, Color4, Matrix, RayHelper, AxesViewer, PointerEventTypes} from "@babylonjs/core";
 import SceneComponent from "../components/SceneComponent"; // uses above component in same directory
 // import SceneComponent from 'babylonjs-hook'; // if you install 'babylonjs-hook' NPM.
 // import "./App.css";
@@ -48,7 +48,7 @@ const onSceneReady = (scene) => {
     //MESHES
     // Our built-in 'ground' shape.
     const ground = MeshBuilder.CreateGround("ground", { width: 20, height: 20 }, scene);
-
+    ground.enablePointerMoveEvents = true;
 
     // Our built-in 'box' shape.
     box = MeshBuilder.CreateBox("box", { size: 2 }, scene);
@@ -66,91 +66,298 @@ const onSceneReady = (scene) => {
     const newBox = new MyBox(2, new Vector3(-3, 1, -2), scene, mainMaterial)
     newBox.showWireframe(5.0, new Color4(0, 0, 0, 1))
 
-
-    //LINES TESTING
-    // const linesOptions = {
-    // points: [new Vector3(-5, 0, 0), new Vector3(5, 0, 0)], //vec3 array,
-    // updatable: true
-    // }
-
-    // let lines = MeshBuilder.CreateLines("lines", linesOptions, scene);
-    // lines.color = new Color3(1, 0, 0);
-    // linesOptions.points[0].x +=6; 
-    // linesOptions.instance = lines;
-    // lines = MeshBuilder.CreateLines("lines", linesOptions);
-
-
+/*
     const onDrawingLine = () => {
 
-        console.log('button click')
         let lines
         const optionsLine = {
             points: [],//vec3 array,
             updatable: true
         };
         let pointsCounter = 0
+    
+        //detecting mouse buttons
+        // scene.onPointerDown = () => {
+        // scene.onPointerObservable.add((pointerInfo) => {
+        //     switch (pointerInfo.type) {
+        //         case PointerEventTypes.POINTERTAP:
+        //             switch (pointerInfo.event.button) {
+        //                 case 0:
+        //                     startDrawingLine()
+        //                     console.log("LEFT");
+        //                     break;
+        //                 case 1: 
+        //                     console.log("MIDDLE");
+        //                     break;
+        //                 case 2: 
+        //                     console.log("RIGHT");
+        //                     break;
+        //             }
+        //         break;
+        //     }
+        // });
+        // }
 
+
+
+        scene.onPointerDown = () => {
         
-
-
-        
-
-        scene.onPointerDown = () => { 
-            
-        let ray = scene.createPickingRay(scene.pointerX, scene.pointerY,
+            let ray = scene.createPickingRay(scene.pointerX, scene.pointerY,
             Matrix.Identity(), mainCamera);
     
-        let hit = scene.pickWithRay(ray);
+            let hit = scene.pickWithRay(ray);
 
-        console.log(ray, hit)
+            console.log(ray, hit)
 
-                if(hit.pickedMesh && hit.pickedMesh.name == 'ground'){
-                    pointsCounter++
-                    console.log('point', hit.pickedPoint)
-    
-                    const miniBox = new MyBox(0.15, hit.pickedPoint, scene, mainMaterial)
-                    
-                    optionsLine.points = [hit.pickedPoint, hit.pickedPoint];
-                    
-                    lines = MeshBuilder.CreateLines("lines", optionsLine, scene);  //scene is optional and defaults to the current scene
-                    lines.color = new Color3(1, 0, 0);
 
-                    scene.onPointerMove = () => {
-                    ray = scene.createPickingRay(scene.pointerX, scene.pointerY,
-                            Matrix.Identity(), mainCamera);
-                    
-                    hit = scene.pickWithRay(ray);
+            if(hit.pickedMesh && hit.pickedMesh.name == 'ground'){
+                
+                pointsCounter++
 
-                    if(hit.pickedMesh && hit.pickedMesh.name == 'ground'){
-                        console.log(ray, hit)
-                    
-                        optionsLine.points[0] = hit.pickedPoint; 
-                        optionsLine.instance = lines;
-                        console.log('lines', optionsLine.points[0])
-        
-                        lines = MeshBuilder.CreateLines("lines", optionsLine); 
-                        //No scene parameter when using instance
-                        pointsCounter ++
-                    }
-                    
+                const miniBox = new MyBox(0.15, hit.pickedPoint, scene, mainMaterial)
+                console.log('first point')
+                
+                optionsLine.points = [hit.pickedPoint, hit.pickedPoint];
+                
+                lines = MeshBuilder.CreateLines("lines", optionsLine, scene);  //scene is optional and defaults to the current scene
+                lines.color = new Color3(1, 0, 0);
+
+
+                console.log('before ONPOINTER MOVE INIT',pointsCounter)
+
+
+                //condition to start onpointermove
+                if(pointsCounter < 2){
+
+                    scene.onPointerMove = (evt, pickResult) => {
+                        console.log('AFTER ONPOINTER MOVE INIT',pointsCounter)
+                            if(pickResult.hit){
+                                
+                                optionsLine.points[0] = pickResult.pickedPoint; 
+                                optionsLine.instance = lines;
+                                
+                                lines = MeshBuilder.CreateLines("lines", optionsLine)
+                                if(pointsCounter < 2){
+
+                                    scene.onPointerDown = () => {
+                                    
+                                    ray = scene.createPickingRay(scene.pointerX, scene.pointerY,
+                                    Matrix.Identity(), mainCamera);
+                            
+                                    hit = scene.pickWithRay(ray);
+
+                                    console.log(ray, hit)
+                                    pointsCounter++
+                                    const miniBox = new MyBox(0.15, hit.pickedPoint, scene, mainMaterial)
+                                    console.log('second point')
+                                    console.log('second click points Counter', pointsCounter)
+                                    
+                                    return pointsCounter
+                                };
+
+                                return pointsCounter
+
+
+
+
+                                }
+                                
+                            }
+                            else {
+                                //console.log('Line can be continued only on ground');
+                                return pointsCounter}
                     };
 
+
+                }
+                else{
+                    return pointsCounter 
                 };
 
-                console.log('ERROR')
-                return
+
+                
+
+
+
+
+
+
+
+                }
+                else {
+                    console.log('Line can be started only on ground')
+                    return
+                }
+
+            console.log('func start')
+            return    
         };
+
+        
+
+
+        return
     };
 
+    */
 
 
+
+    const initLine = (position, optionsLine, lines) => {
+        
+        optionsLine.points = [position, position];
+        lines = MeshBuilder.CreateLines("lines", optionsLine, scene);  //scene is optional and defaults to the current scene
+        lines.color = new Color3(1, 0, 0);
+
+        return({
+            lines:lines,
+            optionsLine: optionsLine
+        })
+    };
+
+    const updateLine = () => {
+        var moveObserver = scene.onPointerObservable.add((pointerInfo) => {            
+            switch (pointerInfo.type) {
+                //if key down
+                case PointerEventTypes.POINTERMOVE:
+                    const point = pointerInfo.pickInfo.pickedPoint
+                    console.log(point)
+                    //counter++
+                    break;
+                default:
+                    break;
+            };
+            
+        
+            
+            // if(counter>0){
+            //     scene.onPointerObservable.remove(moveObserver)
+            // console.log('REMOVED Move observer')
+            // }
+
+        });
+    }
+    //observer for click
+    const createPoint = () => {
+        let counter = 0
+
+        var observer = scene.onPointerObservable.add((pointerInfo) => {            
+            switch (pointerInfo.type) {
+                //if key down
+                case PointerEventTypes.POINTERDOWN:
+                    switch(pointerInfo.event.button){
+                        case 0:
+                            const point = pointerInfo.pickInfo.pickedPoint
+                            console.log(point)
+                            placePoint(point)
+                            counter++
+                            break;
+                        default:
+                            console.log('wrong button');
+                            break;
+                    };
+                break;
+                default:                               
+                    break;
+            }
+            
+            if(counter>0){
+                scene.onPointerObservable.remove(observer)
+            console.log('REMOVED')}
+
+        });
+
+            
+    }
     
+    const placePoint = (point) => {
+        const newPoint = new MyBox(0.1, point, scene, mainMaterial)
+
+    };
+
+    const createLine = () => {
+        
+        let counter = 0
+
+        console.log('creatingLine');
+
+        var observer = scene.onPointerObservable.add((pointerInfo) => {            
+            switch (pointerInfo.type) {
+                //if key down
+                case PointerEventTypes.POINTERDOWN:
+                    switch(pointerInfo.event.button){
+                        case 0:
+                            const point = pointerInfo.pickInfo.pickedPoint
+                            console.log(point)
+                            placePoint(point)
+                            counter++
+                            break;
+                        default:
+                            console.log('wrong button');
+                            break;
+                    };
+                break;
+                default:                               
+                    break;
+            }
+
+            if(counter > 0){
+            scene.onPointerObservable.remove(observer);
+            console.log('REMOVED first-click-observer');
+
+            
+                updateLine()
+                var observerClick = scene.onPointerObservable.add((pointerInfo) => {          
+                    switch (pointerInfo.type) {
+                        //if key down
+                        case PointerEventTypes.POINTERDOWN:
+                            switch(pointerInfo.event.button){
+                                case 0:
+                                    const point = pointerInfo.pickInfo.pickedPoint
+                                    console.log(point)
+                                    placePoint(point)
+                                    counter++
+                                    console.log('COUNTER', counter)
+                                    break;
+                                default:
+                                    console.log('wrong button');
+                                    break;
+                            };
+                            break;
+                        default:                               
+                            break;
+                    }
+
+                    if(counter > 1){
+                        scene.onPointerObservable.remove(observerClick);
+                        console.log('REMOVED 2 onclick observ')
+                    };
+                })
+        }
 
 
 
-    
 
-    //SHADOW
+        });
+            
+        
+    }
+ 
+
+    const onDrawPoint = () => {
+        createPoint()
+    };
+
+    const onDrawLine = () => {
+        console.log('button was clicked')
+        createLine()
+        
+            
+        
+        
+    };
+
+    //SHADOWS
     var shadowGenerator = new ShadowGenerator(1024, sunLight);
     shadowGenerator.getShadowMap().renderList.push(box, secondBox);
     ground.receiveShadows = true;
@@ -159,17 +366,43 @@ const onSceneReady = (scene) => {
     //GUI
     const createButton = () => {
     let guiCanvas = GUI.AdvancedDynamicTexture.CreateFullscreenUI('myUI', true, scene);
-    let guiButton = GUI.Button.CreateSimpleButton('guiButton', 'Draw Line');
-    guiButton.width = '100px';
-    guiButton.height = '50px';
+    var grid = new GUI.Grid();   
+    grid.background = "grey"; 
+    guiCanvas.addControl(grid);
+    
+    grid.width = "100px";
+    grid.height = "50px";
+
+    grid.addColumnDefinition(grid.width, true);
+    grid.addRowDefinition(0.5);
+    grid.addRowDefinition(0.5);
+    grid.fontSize = 12
+    grid.horizontalAlignment = GUI.Control.HORIZONTAL_ALIGNMENT_LEFT
+    grid.verticalAlignment = GUI.Control.VERTICAL_ALIGNMENT_TOP
+    
+    let guiButton = GUI.Button.CreateSimpleButton('guiButton', 'Create Point');
+    //guiButton.width = '100px';
+    //guiButton.height = '50px';
     guiButton.color = 'black';
     guiButton.cornerRadius = '3';
-    guiButton.background = 'grey';
-    guiButton.verticalAlignment = GUI.Control.VERTICAL_ALIGNMENT_TOP
-    //what to do when clicked
-    guiButton.onPointerUpObservable.add(onDrawingLine)
+    guiButton.background = 'white';
+    
 
-    guiCanvas.addControl(guiButton)
+    let guiButton2 = GUI.Button.CreateSimpleButton('guiButton2', 'Draw Line');
+    //guiButton2.width = '100px';
+    //guiButton2.height = '50px';
+    guiButton2.color = 'black';
+    guiButton2.cornerRadius = '3';
+    guiButton2.background = 'white';
+    
+    //what to do when clicked
+    guiButton.onPointerUpObservable.add(onDrawPoint)
+    guiButton2.onPointerUpObservable.add(onDrawLine)
+
+
+
+    grid.addControl(guiButton, 0)
+    grid.addControl(guiButton2, 1)
     };
 
 
